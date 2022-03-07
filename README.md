@@ -3,6 +3,18 @@ beer-type-predictor
 
 Neural network based beer type predictor using rating criteria.
 
+Setup instructions
+------------
+1. Clone the project
+2. Build the docker image
+<pre>
+docker build -t pytorch-notebook:latest .
+</pre>
+3. Run the image
+<pre>
+docker run  -dit --rm --name beer_type_predictor -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes -v ${PWD}:/home/jovyan/work -v ${PWD}:/home/jovyan/work/src pytorch-notebook:latest
+</pre>
+
 Project Organization
 ------------
 
