@@ -90,6 +90,41 @@ class PytorchDataset(Dataset):
     def __len__ (self):
         return len(self.X_data)
 
+class PytorchDataset1(Dataset):
+    """
+    Pytorch dataset
+    ...
+
+    Attributes
+    ----------
+    X_tensor : Pytorch tensor
+        Features tensor
+    y_tensor : Pytorch tensor
+        Target tensor
+
+    Methods
+    -------
+    __getitem__(index)
+        Return features and target for a given index
+    __len__
+        Return the number of observations
+    to_tensor(data)
+        Convert Pandas Series to Pytorch tensor
+    """
+        
+    def __init__(self, X, y):
+        self.X_tensor = self.to_tensor(X)
+        self.y_tensor = self.to_tensor(y)
+    
+    def __getitem__(self, index):
+        return self.X_tensor[index], self.y_tensor[index]
+        
+    def __len__ (self):
+        return len(self.X_tensor)
+    
+    def to_tensor(self, data):
+        return torch.Tensor(np.array(data))
+
 def multi_acc(y_pred, y_test):
     y_pred_softmax = torch.log_softmax(y_pred, dim = 1)
     _, y_pred_tags = torch.max(y_pred_softmax, dim = 1)    
@@ -133,12 +168,10 @@ def train_classification(train_data, model, criterion, optimizer, batch_size, de
     
     # Set model to training mode
     model.train()
-    train_loss=0
     train_epoch_loss = 0
     train_epoch_acc = 0
 
     # Create data loader
-    # train_data = train_data.type(torch.LongTensor)
     data = DataLoader(train_data, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     
     # Iterate through data by batch of observations
@@ -153,12 +186,11 @@ def train_classification(train_data, model, criterion, optimizer, batch_size, de
         # Make predictions
         output = model(feature)
         
-        # Calculate loss for given batch
+        # Calculate loss and accuracy for given batch
         loss = criterion(output, target_class)
         train_acc = multi_acc(output, target_class)
         
-        # Calculate global loss
-        train_loss += loss.item()
+        # Calculate global loss and accuracy
         train_epoch_loss += loss.item()
         train_epoch_acc += train_acc.item()
         
@@ -172,8 +204,143 @@ def train_classification(train_data, model, criterion, optimizer, batch_size, de
     if scheduler:
         scheduler.step()
     print()
-    return train_epoch_loss / len(train_data), np.sqrt(train_epoch_loss / len(train_data))
+    return train_epoch_loss / len(data), train_epoch_acc / len(data)
 
+
+def train_classification1(train_data, model, criterion, optimizer, batch_size, device, scheduler=None, generate_batch=None):
+    """Train a Pytorch multi-class classification model
+
+    Parameters
+    ----------
+    train_data : torch.utils.data.Dataset
+        Pytorch dataset
+    model: torch.nn.Module
+        Pytorch Model
+    criterion: function
+        Loss function
+    optimizer: torch.optim
+        Optimizer
+    bacth_size : int
+        Number of observations per batch
+    device : str
+        Name of the device used for the model
+    scheduler : torch.optim.lr_scheduler
+        Pytorch Scheduler used for updating learning rate
+    collate_fn : function
+        Function defining required pre-processing steps
+
+    Returns
+    -------
+    Float
+        Loss score
+    Float:
+        Accuracy Score
+    """
+    
+    # Set model to training mode
+    model.train()
+    train_loss = 0
+    train_acc = 0
+    
+    # Create data loader
+    data = DataLoader(train_data, batch_size=batch_size, shuffle=True, collate_fn=generate_batch, drop_last=True)
+    
+    # Iterate through data by batch of observations
+    for feature, target_class in data:
+
+        # Reset gradients
+        optimizer.zero_grad()
+        
+        # Load data to specified device
+        feature, target_class = feature.to(device), target_class.to(device)
+        
+        # Make predictions
+        output = model(feature)
+        
+        # print("feature shape")
+        # print(feature.shape)
+        # print("output shape")
+        # print(output.shape)
+        # print("target_class shape")
+        # print(target_class.shape)
+
+        # Calculate loss for given batch
+        loss = criterion(output, target_class.long())
+
+        # Calculate global loss
+        train_loss += loss.item()
+        
+        # Calculate gradients
+        loss.backward()
+
+        # Update Weights
+        optimizer.step()
+        
+        # Calculate global accuracy
+        train_acc += (output.argmax(1) == target_class).sum().item()
+
+    # Adjust the learning rate
+    if scheduler:
+        scheduler.step()
+
+    return train_loss / len(train_data), train_acc / len(train_data)
+
+def test_classification1(test_data, model, criterion, batch_size, device, generate_batch=None):
+    """Calculate performance of a Pytorch multi-class classification model
+
+    Parameters
+    ----------
+    test_data : torch.utils.data.Dataset
+        Pytorch dataset
+    model: torch.nn.Module
+        Pytorch Model
+    criterion: function
+        Loss function
+    bacth_size : int
+        Number of observations per batch
+    device : str
+        Name of the device used for the model
+    collate_fn : function
+        Function defining required pre-processing steps
+
+    Returns
+    -------
+    Float
+        Loss score
+    Float:
+        Accuracy Score
+    """    
+    
+    # Set model to evaluation mode
+    model.eval()
+    test_loss = 0
+    test_acc = 0
+    
+    # Create data loader
+    data = DataLoader(test_data, batch_size=batch_size, collate_fn=generate_batch, drop_last=True)
+    
+    # Iterate through data by batch of observations
+    for feature, target_class in data:
+        
+        # Load data to specified device
+        feature, target_class = feature.to(device), target_class.to(device)
+        
+        # Set no update to gradients
+        with torch.no_grad():
+            
+            # Make predictions
+            output = model(feature)
+            
+            # Calculate loss for given batch
+            loss = criterion(output, target_class.long())
+
+            # Calculate global loss
+            test_loss += loss.item()
+            
+            # Calculate global accuracy
+            test_acc += (output.argmax(1) == target_class).sum().item()
+
+    return test_loss / len(test_data), test_acc / len(test_data)
 
 def test_classification(test_data, model, criterion, batch_size, device, collate_fn=None):
     """Calculate performance of a Pytorch classification model
@@ -203,7 +370,8 @@ def test_classification(test_data, model, criterion, batch_size, device, collate
     
     # Set model to evaluation mode
     model.eval()
-    test_loss = 0
+    test_epoch_loss = 0
+    test_epoch_acc = 0
 
     # Create data loader
     data = DataLoader(test_data, batch_size=batch_size, collate_fn=collate_fn)
@@ -219,11 +387,25 @@ def test_classification(test_data, model, criterion, batch_size, device, collate
             
             # Make predictions
             output = model(feature)
+            loss = criterion(output, target_class)
+            test_acc = multi_acc(output, target_class)
             
             # Calculate loss for given batch
-            loss = criterion(output, target_class)
+            test_epoch_loss += loss.item()
+            test_epoch_acc += test_acc.item()
+
             
-            # Calculate global loss
-            test_loss += loss.item()
-            
-    return test_loss / len(test_data), np.sqrt(test_loss / len(test_data))
+    return test_epoch_loss / len(data), test_epoch_acc / len(data)
+
+class PytorchMultiClass(nn.Module):
+    def __init__(self, num_features, num_classes):
+        super(PytorchMultiClass, self).__init__()
+        
+        self.layer_1 = nn.Linear(num_features, 32)
+        self.layer_out = nn.Linear(32, num_classes)
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, x):
+        x = F.dropout(F.relu(self.layer_1(x)), training=self.training)
+        x = self.layer_out(x)
+        return self.softmax(x)
