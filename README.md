@@ -15,6 +15,18 @@ docker build -t pytorch-notebook:latest .
 docker run  -dit --rm --name beer_type_predictor -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes -v ${PWD}:/home/jovyan/work -v ${PWD}/src:/home/jovyan/work/src pytorch-notebook:latest
 </pre>
 
+Setup instructions for the API
+------------
+1. Navigate to api folder and build the Docker file
+<pre>
+docker build -t nn-fastapi:latest .
+</pre>
+2. Run the image
+<pre>
+docker run -dit --rm --name nn_fastapi -p 8080:80 nn-fastapi:latest
+</pre>
+
+
 Project Organization
 ------------
 
