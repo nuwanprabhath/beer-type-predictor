@@ -25,6 +25,10 @@ docker build -t nn-fastapi:latest .
 <pre>
 docker run -dit --rm --name nn_fastapi -p 8080:80 nn-fastapi:latest
 </pre>
+3. To deploy in Heroku
+<pre>
+git push heroku master
+</pre>
 
 
 Project Organization
