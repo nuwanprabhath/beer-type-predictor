@@ -25,7 +25,8 @@ docker build -t nn-fastapi:latest .
 <pre>
 docker run -dit --rm --name nn_fastapi -p 8080:80 nn-fastapi:latest
 </pre>
-3. To deploy in Heroku
+3. Navigate to [http://localhost:8080/](http://localhost:8080/)
+4. To deploy in Heroku (assuming you have setup your application)
 <pre>
 git push heroku master
 </pre>
