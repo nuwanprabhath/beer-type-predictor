@@ -6,7 +6,8 @@ Neural network based beer type predictor using rating criteria.
 Setup instructions
 ------------
 1. Clone the project
-2. Build the docker image
+2. Add beer_reviews.csv to data/raw folder
+3. Build the docker image
 <pre>
 docker build -t pytorch-notebook:latest .
 </pre>
@@ -14,10 +15,13 @@ docker build -t pytorch-notebook:latest .
 <pre>
 docker run  -dit --rm --name beer_type_predictor -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes -v ${PWD}:/home/jovyan/work -v ${PWD}/src:/home/jovyan/work/src pytorch-notebook:latest
 </pre>
+4. Run the notebook train_model_v3 in /notebooks
 
 Setup instructions for the API
 ------------
-1. Navigate to api folder and build the Docker file
+1. Copy /models/pytorch_classification_v1.pt to /api/models
+2. Copy all files in /data/processed to /api/data/processed
+3. Navigate to api folder and build the Docker file
 <pre>
 docker build -t nn-fastapi:latest .
 </pre>
@@ -31,6 +35,10 @@ docker run -dit --rm --name nn_fastapi -p 8080:80 nn-fastapi:latest
 git push heroku master
 </pre>
 
+Heroku deployment
+------------
+Access the deployed version of the API here: [https://intense-atoll-50811.herokuapp.com](https://intense-atoll-50811.herokuapp.com)
+
 
 Project Organization
 ------------
@@ -38,6 +46,15 @@ Project Organization
     ├── LICENSE
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
     ├── README.md          <- The top-level README for developers using this project.
+    ├── api
+    │   ├── app            <- API endpoints
+    │   ├── data           
+    │   │   └── processed  <- Processed data during training process.
+    │   ├── models         <- Trained and serialized models, model predictions, or model summaries.
+    │   └── src            <- Source code for use in this project.
+    │       ├── data       <- Scripts to download or generate data.
+    │       └── models     <- Scripts to train models and then use trained models to make predictions.
+    │   
     ├── data
     │   ├── external       <- Data from third party sources.
     │   ├── interim        <- Intermediate data that has been transformed.
