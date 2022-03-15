@@ -230,9 +230,9 @@ def test_classification(test_data, model, criterion, batch_size, device, generat
 class PytorchMultiClass(nn.Module):
     def __init__(self, num_features, num_classes):
         super(PytorchMultiClass, self).__init__()
-        
-        self.layer_1 = nn.Linear(num_features, 32)
-        self.layer_out = nn.Linear(32, num_classes)
+        print("PytorchMultiClass v1")
+        self.layer_1 = nn.Linear(num_features, 108)
+        self.layer_out = nn.Linear(108, num_classes)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):

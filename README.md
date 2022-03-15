@@ -3,7 +3,7 @@ beer-type-predictor
 
 Neural network based beer type predictor using rating criteria.
 
-Setup instructions
+Setup instructions for model training and testing
 ------------
 1. Clone the project
 2. Add beer_reviews.csv to data/raw folder
@@ -19,9 +19,10 @@ docker run  -dit --rm --name beer_type_predictor -p 8888:8888 -e JUPYTER_ENABLE_
 
 Setup instructions for the API
 ------------
-1. Copy /models/pytorch_classification_v1.pt to /api/models
-2. Copy all files in /data/processed to /api/data/processed
-3. Navigate to api folder and build the Docker file
+1. Clone the API git repo to the /api folder from here: [https://github.com/nuwanprabhath/nn_api](https://github.com/nuwanprabhath/nn_api)
+2. Copy /models/pytorch_classification_v1.pt to /api/models
+3. Copy all files in /data/processed to /api/data/processed
+4. Navigate to api folder and build the Docker file
 <pre>
 docker build -t nn-fastapi:latest .
 </pre>
