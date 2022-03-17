@@ -168,7 +168,7 @@ def train_classification(train_data, model, criterion, optimizer, batch_size, de
     if scheduler:
         scheduler.step()
 
-    return train_loss / len(train_data), train_acc / len(train_data)
+    return round(train_loss / len(train_data), 4), round(train_acc*100 / len(train_data), 2)
 
 def test_classification(test_data, model, criterion, batch_size, device, generate_batch=None):
     """Calculate performance of a Pytorch multi-class classification model
@@ -225,14 +225,14 @@ def test_classification(test_data, model, criterion, batch_size, device, generat
             # Calculate global accuracy
             test_acc += (output.argmax(1) == target_class).sum().item()
 
-    return test_loss / len(test_data), test_acc / len(test_data)
+    return round(test_loss / len(test_data), 4), round(test_acc*100 / len(test_data), 2)
 
 class PytorchMultiClass(nn.Module):
     def __init__(self, num_features, num_classes):
         super(PytorchMultiClass, self).__init__()
-        print("PytorchMultiClass v1")
-        self.layer_1 = nn.Linear(num_features, 108)
-        self.layer_out = nn.Linear(108, num_classes)
+        print("PytorchMultiClass v12")
+        self.layer_1 = nn.Linear(num_features, 30)
+        self.layer_out = nn.Linear(30, num_classes)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):

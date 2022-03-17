@@ -21,3 +21,16 @@ def corrs_X_y(df_in, y):
 
     print('Most Negative Correlations with Target:') 
     print(correlations.dropna().head(10))
+
+
+def plot_two_series(series_1, series_2, x_label, y_label, legend, title):
+    """
+    Plot two series in one plot
+    """
+    plt.plot(series_1,'-o')
+    plt.plot(series_2,'-o')
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.legend(legend)
+    plt.title(title)
+    plt.show()
