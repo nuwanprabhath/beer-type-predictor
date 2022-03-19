@@ -15,12 +15,12 @@ docker build -t pytorch-notebook:latest .
 <pre>
 docker run  -dit --rm --name beer_type_predictor -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes -v ${PWD}:/home/jovyan/work -v ${PWD}/src:/home/jovyan/work/src pytorch-notebook:latest
 </pre>
-4. Run the notebook train_model_v3 in /notebooks
+1. Run the notebook train_model in /notebooks
 
 Setup instructions for the API
 ------------
 1. Clone the API git repo to the /api folder from here: [https://github.com/nuwanprabhath/nn_api](https://github.com/nuwanprabhath/nn_api)
-2. Copy /models/pytorch_classification_v1.pt to /api/models
+2. Copy /models/pytorch_classification_v2.pt to /api/models
 3. Copy all files in /data/processed to /api/data/processed
 4. Navigate to api folder and build the Docker file
 <pre>
